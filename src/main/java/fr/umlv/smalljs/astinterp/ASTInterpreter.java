@@ -140,19 +140,49 @@ public final class ASTInterpreter {
                 throw new ReturnError(value);
             }
             case If(Expr condition, Block trueBlock, Block falseBlock, int lineNumber) -> {
-                throw new UnsupportedOperationException("TODO If");
+                var v = visit(condition, env);
+                if (v instanceof Integer i){
+                    if (i == 1){
+                        yield visit(trueBlock, env);
+                    } else {
+                        yield visit(falseBlock, env);
+                    }
+
+                } else {
+                    throw new Failure("Not a boolean");
+                }
             }
             case ObjectLiteral(Map<String, Expr> initMap, int lineNumber) -> {
-                throw new UnsupportedOperationException("TODO ObjectLiteral");
+                var obj = JSObject.newObject(null);
+                for (var v : initMap.entrySet()){
+                    obj.register(v.getKey(), visit(v.getValue(), env));
+                }
+                yield obj;
+
             }
             case FieldAccess(Expr receiver, String name, int lineNumber) -> {
-                throw new UnsupportedOperationException("TODO FieldAccess");
+                var object = visit(receiver, env);
+                if (!(object instanceof JSObject o)){
+                    throw new Failure("No such variable");
+                }
+                yield o.lookupOrDefault(name, UNDEFINED);
             }
             case FieldAssignment(Expr receiver, String name, Expr expr, int lineNumber) -> {
-                throw new UnsupportedOperationException("TODO FieldAssignment");
+                var object = visit(receiver, env);
+                if (!(object instanceof JSObject o)){
+                    throw new Failure("No such variable");
+                }
+                var value = visit(expr, env);
+                o.register(name, value);
+                yield value;
+
             }
             case MethodCall(Expr receiver, String name, List<Expr> args, int lineNumber) -> {
-                throw new UnsupportedOperationException("TODO MethodCall");
+                var object = visit(receiver, env);
+                if (!(object instanceof JSObject o)){
+                    throw new Failure("No such method");
+                }
+                yield o.invoke(name, args);
             }
         };
     }

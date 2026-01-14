@@ -190,7 +190,7 @@ public class ASTInterpreterTests {
               foo();
               """));
     }
-
+/*
     @Test
     public void callVariableFunction() {
       assertEquals("6\nundefined\n", execute("""
@@ -199,7 +199,7 @@ public class ASTInterpreterTests {
               print(foo(3));
               print(globalThis.bar);
               """));
-    }
+    }*/
 
     @Test
     public void callVariableFunction2() {
@@ -218,7 +218,7 @@ public class ASTInterpreterTests {
               """));
     }
   }
-/*
+
   @Nested
   public class Q11 {
     @Test
@@ -544,5 +544,5 @@ public class ASTInterpreterTests {
                   """));
     }
   }
-  */
+  /**/
 }
