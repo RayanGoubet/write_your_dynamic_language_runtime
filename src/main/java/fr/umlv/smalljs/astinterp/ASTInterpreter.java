@@ -142,14 +142,14 @@ public final class ASTInterpreter {
             case If(Expr condition, Block trueBlock, Block falseBlock, int lineNumber) -> {
                 var v = visit(condition, env);
                 if (v instanceof Integer i){
-                    if (i == 1){
+                    if (i != 0){
                         yield visit(trueBlock, env);
                     } else {
                         yield visit(falseBlock, env);
                     }
 
                 } else {
-                    throw new Failure("Not a boolean");
+                    throw new Failure("Not a boolean at line " + lineNumber);
                 }
             }
             case ObjectLiteral(Map<String, Expr> initMap, int lineNumber) -> {
@@ -163,26 +163,31 @@ public final class ASTInterpreter {
             case FieldAccess(Expr receiver, String name, int lineNumber) -> {
                 var object = visit(receiver, env);
                 if (!(object instanceof JSObject o)){
-                    throw new Failure("No such variable");
+                    throw new Failure("No such variable at line " + lineNumber);
                 }
                 yield o.lookupOrDefault(name, UNDEFINED);
             }
             case FieldAssignment(Expr receiver, String name, Expr expr, int lineNumber) -> {
                 var object = visit(receiver, env);
                 if (!(object instanceof JSObject o)){
-                    throw new Failure("No such variable");
+                    throw new Failure("No such variable at line " + lineNumber);
                 }
                 var value = visit(expr, env);
                 o.register(name, value);
                 yield value;
 
             }
-            case MethodCall(Expr receiver, String name, List<Expr> args, int lineNumber) -> {
+            case MethodCall(Expr receiver, String name, List<Expr> exprArgs, int lineNumber) -> {
                 var object = visit(receiver, env);
                 if (!(object instanceof JSObject o)){
-                    throw new Failure("No such method");
+                    throw new Failure("No such object at line " + lineNumber);
                 }
-                yield o.invoke(name, args);
+                var function = o.lookupOrDefault(name, UNDEFINED);
+                if (!(function instanceof JSObject f)){
+                    throw new Failure("No such method at line " + lineNumber);
+                }
+                var args = exprArgs.stream().map(x -> visit(x, env)).toArray();
+                yield f.invoke(o, args);
             }
         };
     }
