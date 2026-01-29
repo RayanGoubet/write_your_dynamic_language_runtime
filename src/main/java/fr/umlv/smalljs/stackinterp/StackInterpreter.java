@@ -120,7 +120,7 @@ public final class StackInterpreter {
 					// find the current instruction
 					int indexTagValue = instrs[pc++];
 					// decode the name from the instructions
-					String name = (String) decodeAnyValue(indexTagValue, dict, heap);
+					String name = (String) decodeDictObject(indexTagValue, dict);
 					// pop the value from the stack and decode it
 					Object value = decodeAnyValue(pop(stack, --sp), dict, heap);
 					// register it in the global environment
@@ -146,7 +146,7 @@ public final class StackInterpreter {
 					// get value on top of the stack (without remove it)
 					var value = stack[sp - 1];
 					// push it on top of the stack
-					push(stack, sp, value);
+					push(stack, sp++, value);
 				}
 				case Instructions.POP -> {
 					// adjust the stack pointer
